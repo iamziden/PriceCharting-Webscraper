@@ -1,25 +1,4 @@
-import requests
-import pandas as pd
-from bs4 import BeautifulSoup
-
-# Scrape market price from specified URL.
-def scrape_market_price(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0"
-    }
-    
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    
-    soup = BeautifulSoup(response.text, "html.parser")
-    
-    price_tag = soup.select_one("td#used_price span.price.js-price")
-    
-    if price_tag:
-        price = price_tag.get_text(strip=True).replace("$", "")
-        return price
-    else:
-        return None
+import scrape
 
 # Return product from URL.
 def get_product(df, url):
@@ -87,20 +66,37 @@ def get_return_percent(df, product):
 
 # Adds a new row
 def new_row(df):
-    product = input("Enter product name: ")
     url = input("Enter PriceCharting URL: ")
-    quantity = input("Enter product quantity: ")
-    msrp = input("Enter MSRP (Retail): ")
+    if scrape.valid_url(url) == False:
+        print("Invalid URL. Product will not be saved.")
+        return None
     
-    market = scrape_market_price(url)
+    quantity = input("Enter product quantity: ")
+    try:
+        val = int(quantity)
+    except ValueError:
+        print("Invalid Quantity. Product will not be saved.")
+        return None
+    
+    msrp = input("Enter MSRP (Retail): ")
+    try:
+        val = float(msrp)
+    except ValueError:
+        print("Invalid MSRP. Product will not be saved.")
+        return None
+    
+    set_name, product_type, market, genre = scrape.product_details(url)
+    
     totalmsrp = float(msrp) * int(quantity)
     totalmarket = float(market) * int(quantity)
     returnamount = totalmarket - totalmsrp
     returnpercent = round(totalmarket / totalmsrp * 100)
     
     df.loc[len(df)] = {
-        "Product": product,
         "URL": url,
+        "Set": set_name,
+        "Product": product_type,
+        "Genre": genre,
         "Quantity": quantity,
         "MSRP": msrp,
         "Market": market,
