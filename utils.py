@@ -85,7 +85,7 @@ def new_row(df):
         print("Invalid MSRP. Product will not be saved.")
         return None
     
-    set_name, product_type, market, genre = scrape.product_details(url)
+    game_name, set_name, product_type, market, genre = scrape.product_details(url)
     
     totalmsrp = float(msrp) * int(quantity)
     totalmarket = float(market) * int(quantity)
@@ -94,6 +94,7 @@ def new_row(df):
     
     df.loc[len(df)] = {
         "URL": url,
+        "Game": game_name,
         "Set": set_name,
         "Product": product_type,
         "Genre": genre,

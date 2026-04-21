@@ -16,7 +16,7 @@ else:
 utils.new_row(df)
 
 # Print rows
-print(df[["Set", "Product", "Genre", "Quantity", "Market", "Return", "ReturnPercent"]])
+print(df[["Game", "Set", "Product", "Genre", "Quantity", "Market", "Return", "ReturnPercent"]])
 
 # Export spreadsheet.
 if input("Would you like to save? (Y/N): ") == ("Y" or "y"):

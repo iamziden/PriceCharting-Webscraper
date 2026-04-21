@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 # Return scraped product details from URL.
 # Input: URL
-# Output: Set, Product, Market, Genre
+# Output: Game, Set, Product, Market, Genre
 def product_details(url):
     headers = {
         "User-Agent": "Mozilla/5.0"
@@ -15,8 +15,21 @@ def product_details(url):
     
     soup = BeautifulSoup(response.text, "html.parser")
     
+    # Most popular Trading Card Games
+    tgc = ["Pokemon", "Digimon", "Dragon Ball", "Lorcana", "Magic", "Marvel", "One Piece", "Star Wars", "YuGiOh"]
+    
     name = soup.select_one("h1#product_name").get_text(strip=True)
-    product_type, set_name = name.split("Pokemon ", 1)
+    product_type = ""
+    set_name = ""
+    game_name = ""
+    
+    for game in tgc:
+        if game in name:
+            left, right = name.split(game, 1)
+            product_type = left.strip()
+            set_name = right.strip()
+            game_name = game
+            break
     
     genre = soup.select_one('td.details[itemprop="genre"]').get_text(strip=True)
     
@@ -24,7 +37,7 @@ def product_details(url):
     price = price.get_text(strip=True).replace("$", "").replace(",", "")
     price = float(price)
     
-    return set_name, product_type, price, genre
+    return game_name, set_name, product_type, price, genre,
 
 # Return if URL can be reached.
 def valid_url(url):
@@ -32,7 +45,11 @@ def valid_url(url):
         "User-Agent": "Mozilla/5.0"
         }
     
+    price_charting = "https://www.pricecharting.com/game/"
+    
     try:
+        if price_charting not in url:
+            return False
         response = requests.get(url, headers=headers)
         return response.status_code == 200
     except requests.RequestException:
