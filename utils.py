@@ -1,96 +1,123 @@
 import scrape
 
-# Return product from URL.
+# Fixes column types of dataframe
+def fix_column_types(df):
+    columns = ["MSRP", "Market", "TotalMSRP", "TotalMarket", "ReturnAmt", "ReturnPercent"]
+    
+    for col in columns:
+        df[col] = df[col].astype(float)
+        
+    df["Quantity"].astype(int)
+
+# Retrieves row information from URL
+def get_information(df, url):
+    if not scrape.valid_url(url):
+        return 
+    
+    game = df.loc[df["URL"] == url, "Game"].iloc[0]
+    set_name = df.loc[df["URL"] == url, "Set"].iloc[0]
+    product_type = df.loc[df["URL"] == url, "Product"].iloc[0]
+    quantity = df.loc[df["URL"] == url, "Quantity"].iloc[0]
+    msrp = df.loc[df["URL"] == url, "MSRP"].iloc[0]
+    market = df.loc[df["URL"] == url, "Market"].iloc[0]
+    
+    return game, set_name, product_type, quantity, msrp, market
+
+# Retrieves URL from Set and Product
+def get_URL(df, set_name, product_type):
+    if not ((df["Set"] == set_name) & (df["Product"] == product_type)).any():
+        print("Product not found.")
+        return None
+    
+    url = df.loc[
+        (df["Set"] == set_name) & (df["Product"] == product_type),
+        "URL"].iloc[0]
+    
+    return url
+
+# Retrieve Product from URL
 def get_product(df, url):
-    product = df.loc[df["URL"] == url, "Product"].iloc[0]
-    if product:
-        return product
+    product_type = df.loc[df["URL"] == url, "Product"].iloc[0]
+    if product_type:
+        return product_type
     else:
         return None
 
-# Return market price of specified product.
-def get_market(df, product):
-    market = df.loc[df["Product"] == product, "Market"].iloc[0]
-    if market:
-        return market
+# Retrieve Set from URL
+def get_set(df, url):
+    set_name = df.loc[df["URL"] == url, "Set"].iloc[0]
+    if set_name:
+        return set_name
     else:
         return None
     
-# Return MSRP (Retail) price of specified product.
-def get_msrp(df, product):
-    msrp = df.loc[df["Product"] == product, "MSRP"].iloc[0]
-    if msrp:
-        return msrp
-    else:
-        return None
-
-# Return Quantity of specified product.
-def get_quantity(df, product):
-    quantity = df.loc[df["Product"] == product, "Quantity"].iloc[0]
-    if quantity:
-        return quantity
-    else:
-        return None
-
-# Return total market price of specified product.
-def get_total_market(df, product):
-    totalMarket = df.loc[df["Product"] == product, "TotalMarket"].iloc[0]
-    if totalMarket:
-        return totalMarket
-    else:
-        return None
+# Calculate TotalMSRP, TotalMarket, ReturnAmt, ReturnPercent
+def calculate_totals(quantity, msrp, market):
+    if msrp == 0: return None
     
-# Return total MSRP (Retail) price of specified product.
-def get_total_msrp(df, product):
-    totalMsrp = df.loc[df["Product"] == product, "TotalMSRP"].iloc[0]
-    if totalMsrp:
-        return totalMsrp
-    else:
-        return None
-
-# Return Return% of specified product.
-def get_return(df, product):
-    returnamount = df.loc[df["Product"] == product, "Return"].iloc[0]
-    if returnamount:
-        return returnamount
-    else:
-        return None
+    total_msrp = int(quantity) * float(msrp)
+    total_market = int(quantity) * float(market)
+    return_amount = total_market - total_msrp
+    return_percent = float(round(total_market / total_msrp * 100, 2))
     
-# Return Return% of specified product.
-def get_return_percent(df, product):
-    returnpercent = df.loc[df["Product"] == product, "ReturnPercent"].iloc[0]
-    if returnpercent:
-        return returnpercent
+    return total_msrp, total_market, return_amount, return_percent
+
+# Update TotalMSRP, TotalMarket, ReturnAmt, ReturnPercent
+def update_totals(df, url=None):
+    if url is not None:
+        if not (df["URL"] == url).any():
+            print("Product not found.")
+            return None
+
+        rows = df["URL"] == url
     else:
-        return None
+        rows = df.index
+
+    for index in df.loc[rows].index:
+        quantity = df.loc[index, "Quantity"]
+        msrp = df.loc[index, "MSRP"]
+        market = df.loc[index, "Market"]
+
+        total_msrp, total_market, return_amount, return_percent = calculate_totals(
+            quantity,
+            msrp,
+            market
+        )
+
+        df.loc[index, "TotalMSRP"] = total_msrp
+        df.loc[index, "TotalMarket"] = total_market
+        df.loc[index, "ReturnAmt"] = return_amount
+        df.loc[index, "ReturnPercent"] = return_percent
+
+    print("Totals updated.")
 
 # Adds a new row
 def new_row(df):
-    url = input("Enter PriceCharting URL: ")
+    url = input("\nEnter PriceCharting URL: ")
     if scrape.valid_url(url) == False:
-        print("Invalid URL. Product will not be saved.")
+        print("\nInvalid URL. No changes were made.")
+        return None
+    if (df["URL"] == url).any():
+        print("\nURL already exists. No changes were made.")
         return None
     
     quantity = input("Enter product quantity: ")
     try:
         val = int(quantity)
     except ValueError:
-        print("Invalid Quantity. Product will not be saved.")
+        print("\nInvalid Quantity. Product will not be saved.")
         return None
     
     msrp = input("Enter MSRP (Retail): ")
     try:
         val = float(msrp)
     except ValueError:
-        print("Invalid MSRP. Product will not be saved.")
+        print("\nInvalid MSRP. Product will not be saved.")
         return None
     
     game_name, set_name, product_type, market, genre = scrape.product_details(url)
     
-    totalmsrp = float(msrp) * int(quantity)
-    totalmarket = float(market) * int(quantity)
-    returnamount = totalmarket - totalmsrp
-    returnpercent = round(totalmarket / totalmsrp * 100)
+    total_msrp, total_market, return_amount, return_percent = calculate_totals(quantity, msrp, market)
     
     df.loc[len(df)] = {
         "URL": url,
@@ -101,8 +128,41 @@ def new_row(df):
         "Quantity": quantity,
         "MSRP": msrp,
         "Market": market,
-        "TotalMSRP": totalmsrp,
-        "TotalMarket": totalmarket,
-        "Return": returnamount,
-        "ReturnPercent": returnpercent
+        "TotalMSRP": total_msrp,
+        "TotalMarket": total_market,
+        "ReturnAmt": return_amount,
+        "ReturnPercent": return_percent
     }
+    
+# Update quantity of given product    
+def update_quantity(df, url):
+    if scrape.valid_url(url) == False:
+        print("\nInvalid URL. No changes were made.")
+        return None
+    
+    game, set_name, product_type, quantity, msrp, market = get_information(df, url)
+    
+    print("\nThe current quantity of", set_name, product_type, "(s) is ", quantity, ".")
+    new_quantity = input("Enter new quantity: ").strip()
+    
+    try:
+        new_quantity = int(new_quantity)
+    except ValueError:
+        print("\nInvalid quantity. No changes were made.")
+        return None
+    if new_quantity == quantity:
+        print("\nQuantity is already", quantity, ". No changes were made.")
+        return None
+    
+    total_msrp, total_market, return_amount, return_percent = calculate_totals(
+        quantity, msrp, market
+    )
+    
+    df.loc[df["URL"] == url, "Quantity"] = new_quantity
+    df.loc[df["URL"] == url, "TotalMSRP"] = total_msrp
+    df.loc[df["URL"] == url, "TotalMarket"] = total_market
+    df.loc[df["URL"] == url, "ReturnAmt"] = return_amount
+    df.loc[df["URL"] == url, "ReturnPercent"] = return_percent
+    
+    print("\nQuantity successfully updated.")
+    
