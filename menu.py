@@ -3,12 +3,15 @@ import utils
 from datetime import datetime
 from pathlib import Path
 
+# Prints a line to seperate commands.
 def print_line():
     print("\n- - - - - - - - - -")
 
+# Recieve option input.
 def get_option(prompt="Enter option: "):
     return input(prompt).strip()
 
+# Print main menu options.
 def print_main_menu():
     print_line()
     print("\n[1] Input Item")
@@ -20,7 +23,7 @@ def print_main_menu():
     print("[0] Quit")
     print_line()
 
-
+# Print search menu options.
 def print_search_menu():
     print_line()
     print("\n[1] Search by URL")
@@ -28,6 +31,7 @@ def print_search_menu():
     print("[0] Back")
     print_line()
 
+# Return URL for search method.
 def choose_product_url(df):
     while True:
         print_search_menu()
@@ -51,7 +55,7 @@ def choose_product_url(df):
         else:
             print("\nInvalid option.")
 
-
+# Prints inventory.
 def print_inventory(df):
     columns = [
         "Game",
@@ -65,7 +69,7 @@ def print_inventory(df):
     ]
     print("\n", df[columns])
 
-
+# Saves inventory.
 def save_inventory(df, quit):
     if quit:
         today = datetime.today()
@@ -92,7 +96,7 @@ def save_inventory(df, quit):
     df.to_excel(file_name, index=False)
     print(f"\nSaved to {file_name}.")
 
-
+# Menu loop.
 def run(df):
     while True:
         print_main_menu()
