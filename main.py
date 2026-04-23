@@ -5,7 +5,7 @@ import utils
 
 def main():
     df = pd.read_excel("inventory.xlsx")
-    utils.fix_column_types(df)
+    df = utils.fix_column_types(df)
 
     menu.run(df)
 

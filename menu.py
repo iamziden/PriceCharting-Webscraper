@@ -17,7 +17,7 @@ def print_main_menu():
     print("\n[1] Input Item")
     print("[2] Delete Item")
     print("[3] Update Item Quantity")
-    print("[4] Update Item MSRP / Purchase Price")
+    print("[4] Update Item MSRP / Cost")
     print("[5] Print Inventory")
     print("[9] Save As")
     print("[0] Quit")
@@ -67,7 +67,8 @@ def print_inventory(df):
         "ReturnAmt",
         "ReturnPercent",
     ]
-    print("\n", df[columns])
+    print()
+    print(df[columns].to_string(index=False))
 
 # Saves inventory.
 def save_inventory(df, quit):
@@ -103,10 +104,13 @@ def run(df):
         option = get_option()
 
         if option == "1":
-            utils.new_row(df)
+            url = input("\nEnter PriceCharting URL: ")
+            utils.new_row(df, url)
 
         elif option == "2":
-            print("\nDelete item is not set up yet.")
+            url = choose_product_url(df)
+            if url is not None:
+                utils.delete_row(df, url)
 
         elif option == "3":
             url = choose_product_url(df)

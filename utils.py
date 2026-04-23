@@ -1,6 +1,6 @@
 import scrape
 
-# Fixes column types of dataframe
+# Fixes column types of dataframe, sets URL as index
 def fix_column_types(df):
     columns = ["MSRP", "Market", "TotalMSRP", "TotalMarket", "ReturnAmt", "ReturnPercent"]
     
@@ -8,6 +8,8 @@ def fix_column_types(df):
         df[col] = df[col].astype(float)
         
     df["Quantity"] = df["Quantity"].astype(int)
+    
+    return df.set_index("URL", drop=False)
 
 # Retrieves row information from URL
 def get_information(df, url):
@@ -26,7 +28,7 @@ def get_information(df, url):
 # Retrieves URL from Set and Product
 def get_URL(df, set_name, product_type):
     if not ((df["Set"] == set_name) & (df["Product"] == product_type)).any():
-        print("Product not found.")
+        print("\nProduct not found.")
         return None
     
     url = df.loc[
@@ -92,8 +94,7 @@ def update_totals(df, url=None):
     print("Totals updated.")
 
 # Adds a new row
-def new_row(df):
-    url = input("\nEnter PriceCharting URL: ")
+def new_row(df, url):
     if scrape.valid_url(url) == False:
         print("\nInvalid URL. No changes were made.")
         return None
@@ -119,7 +120,7 @@ def new_row(df):
     
     total_msrp, total_market, return_amount, return_percent = calculate_totals(quantity, msrp, market)
     
-    df.loc[len(df)] = {
+    df.loc[url] = {
         "URL": url,
         "Game": game_name,
         "Set": set_name,
@@ -135,6 +136,21 @@ def new_row(df):
     }
     
     print("\n", game_name, ":", set_name, product_type, "has been inputted.")
+    
+# Delete row
+def delete_row(df, url):
+    if not (df["URL"] == url).any():
+        print("\nProduct not found.")
+        return None
+    
+    game_name, set_name, product_type, _, _, _ = get_information(df, url)
+    
+    option = input(f"\n{game_name}: {set_name} {product_type} will be removed. Proceed? (Y/N): ").strip().lower()
+    if option == ("y"):
+        df.drop(index=url, inplace=True)
+        print("\n", game_name, ":", set_name, product_type, "has been removed.")
+    else:
+        print("\nNo changes were made.")
     
 # Update quantity of given product
 def update_quantity(df, url):
@@ -155,6 +171,9 @@ def update_quantity(df, url):
     if new_quantity == quantity:
         print("\nQuantity is already", quantity, ". No changes were made.")
         return None
+    elif new_quantity <= 0:
+        print("\nQuantity cannot less than or equal to 0. No changes were made.")
+        return None
     
     total_msrp, total_market, return_amount, return_percent = calculate_totals(
         new_quantity, msrp, market
@@ -168,5 +187,37 @@ def update_quantity(df, url):
     
     print("\n", "Quantity of", game_name, ":", set_name, product_type, "has been changed to", new_quantity)
 
+# Update MSRP / Cost of given product.
 def update_msrp(df, url):
-    print("\nMSRP update is not set up yet.")
+    if not (df["URL"] == url).any():
+        print("\nProduct not found.")
+        return None
+    
+    game_name, set_name, product_type, quantity, msrp, market = get_information(df, url)
+    
+    print("\nThe current MSRP / Cost of", set_name, product_type, "is", msrp, ".")
+    new_msrp = input("Enter new MSRP / Cost: ").strip()
+    
+    try:
+        new_msrp = float(new_msrp)
+    except ValueError:
+        print("\nInvalid MSRP / Cost. No changes were made.")
+        return None
+    if new_msrp == msrp:
+        print("\nMSRP / Cost is already", msrp, ". No changes were made.")
+        return None
+    elif new_msrp <= 0:
+        print("\nMSRP / Cost cannot be less than or equal to 0. No changes were made.")
+        return None
+    
+    total_msrp, total_market, return_amount, return_percent = calculate_totals(
+        quantity, new_msrp, market
+    )
+    
+    df.loc[df["URL"] == url, "MSRP"] = new_msrp
+    df.loc[df["URL"] == url, "TotalMSRP"] = total_msrp
+    df.loc[df["URL"] == url, "ReturnAmt"] = return_amount
+    df.loc[df["URL"] == url, "ReturnPercent"] = return_percent
+    
+    print("\n", "MSRP / Cost of", game_name, ":", set_name, product_type, "has been changed to", new_msrp)
+    
