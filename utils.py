@@ -11,6 +11,21 @@ def fix_column_types(df):
     
     return df.set_index("URL", drop=False)
 
+# Updates market prices of all products
+def update_market(df):
+    
+    for index in df.index:
+        url = df.loc[index, "URL"]
+        
+        try:
+            _, _, _, market, _ = scrape.product_details(url)
+            df.loc[index, "Market"] = market
+        except Exception as exception:
+            print("Market price could not be updated for:", url)
+            
+    update_totals(df)
+    print("\nMarket prices have been updated.")
+
 # Retrieves row information from URL
 def get_information(df, url):
     if not (df["URL"] == url).any():
