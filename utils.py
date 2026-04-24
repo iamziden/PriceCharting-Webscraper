@@ -14,17 +14,20 @@ def fix_column_types(df):
 # Updates market prices of all products
 def update_market(df):
     
+    print("\nScraping market prices...")
+    
     for index in df.index:
         url = df.loc[index, "URL"]
         
         try:
             _, _, _, market, _ = scrape.product_details(url)
             df.loc[index, "Market"] = market
+            print("...")
         except Exception as exception:
             print("Market price could not be updated for:", url)
             
+    print("\nMarket prices have been updated.")       
     update_totals(df)
-    print("\nMarket prices have been updated.")
 
 # Retrieves row information from URL
 def get_information(df, url):
@@ -119,14 +122,14 @@ def new_row(df, url):
     
     quantity = input("Enter product quantity: ")
     try:
-        val = int(quantity)
+        quantity = int(quantity)
     except ValueError:
         print("\nInvalid Quantity. Product will not be saved.")
         return None
     
     msrp = input("Enter MSRP (Retail): ")
     try:
-        val = float(msrp)
+        msrp = float(msrp)
     except ValueError:
         print("\nInvalid MSRP. Product will not be saved.")
         return None
@@ -143,11 +146,11 @@ def new_row(df, url):
         "Genre": genre,
         "Quantity": quantity,
         "MSRP": msrp,
-        "Market": market,
-        "TotalMSRP": total_msrp,
-        "TotalMarket": total_market,
-        "ReturnAmt": return_amount,
-        "ReturnPercent": return_percent
+        "Market": float(market),
+        "TotalMSRP": float(total_msrp),
+        "TotalMarket": float(total_market),
+        "ReturnAmt": float(return_amount),
+        "ReturnPercent": float(return_percent)
     }
     
     print("\n", game_name, ":", set_name, product_type, "has been inputted.")
@@ -236,3 +239,28 @@ def update_msrp(df, url):
     
     print("\n", "MSRP / Cost of", game_name, ":", set_name, product_type, "has been changed to", new_msrp)
     
+def print_summary(df):
+    if df.empty:
+        print("\nInventory Summary")
+        print("Items tracked: 0")
+        print("Total quantity: 0")
+        print("Total cost: $0.00")
+        print("Total market value: $0.00")
+        print("Net return: $0.00")
+        print("Average return: 0.00%")
+        return
+
+    items_tracked = len(df)
+    total_quantity = int(df["Quantity"].sum())
+    total_cost = float(df["TotalMSRP"].sum())
+    total_market_value = float(df["TotalMarket"].sum())
+    net_return = float(df["ReturnAmt"].sum())
+    average_return = float(df["ReturnPercent"].mean())
+
+    print("\nInventory Summary")
+    print(f"Items tracked: {items_tracked}")
+    print(f"Total quantity: {total_quantity}")
+    print(f"Total cost: ${total_cost:.2f}")
+    print(f"Total market value: ${total_market_value:.2f}")
+    print(f"Net return: ${net_return:.2f}")
+    print(f"Average return: {average_return:.2f}%")
