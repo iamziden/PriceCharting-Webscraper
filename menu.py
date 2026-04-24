@@ -100,6 +100,8 @@ def save_inventory(df, quit):
 # Menu loop.
 def run(df):
     while True:
+        print_line()
+        utils.print_summary(df)
         print_main_menu()
         option = get_option()
 
