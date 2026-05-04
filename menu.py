@@ -58,12 +58,12 @@ def choose_product_url(df):
 # Prints inventory.
 def print_inventory(df):
     columns = [
-        "Game",
         "Set",
         "Product",
-        "Genre",
         "Quantity",
+        "MSRP",
         "Market",
+        "TotalMarket",
         "ReturnAmt",
         "ReturnPercent",
     ]
