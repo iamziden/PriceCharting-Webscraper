@@ -1,6 +1,6 @@
 # PriceCharting Web Scraper & Inventory Tracker
 
-A Python project for tracking current inventory and current market prices.
+A Python project for tracking inventory and current market prices.
 
 ## Features
 
@@ -67,12 +67,12 @@ Because the program stores inventory data in pandas DataFrames and Excel files, 
 ## Usage
 
 The program provides the following operations:
-- 'Input Item' - Adds an item using a PriceCharting URL
-- 'Delete Item' - Removes an item using either by URL or by Set and Product
-- 'Update Item Quantity' - Updates an item's quantity either by URL or by Set and Product
-- 'Update Item Cost' - Updates an item's cost either by URL or by Set and Product
-- 'Print Inventory' - Prints the entire inventory along with several fields
-- 'Search Inventory' - Prints part of the inventory, searched by URL, Set, or Product
+- `Input Item` - Adds an item using a PriceCharting URL
+- `Delete Item` - Removes an item using either by URL or by Set and Product
+- `Update Item Quantity` - Updates an item's quantity either by URL or by Set and Product
+- `Update Item Cost` - Updates an item's cost either by URL or by Set and Product
+- `Print Inventory` - Prints the entire inventory along with several fields
+- `Search Inventory` - Prints part of the inventory, searched by URL, Set, or Product
 
 ## Future Improvements
 
