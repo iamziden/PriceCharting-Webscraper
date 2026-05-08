@@ -19,6 +19,7 @@ def print_main_menu():
     print("[3] Update Item Quantity")
     print("[4] Update Item MSRP / Cost")
     print("[5] Print Inventory")
+    print("[6] Search Inventory")
     print("[9] Save As")
     print("[0] Quit")
     print_line()
@@ -28,6 +29,14 @@ def print_search_menu():
     print_line()
     print("\n[1] Search by URL")
     print("[2] Search by Set and Product")
+    print("[0] Back")
+    print_line()
+    
+def print_second_search_menu():
+    print_line()
+    print("\n[1] Search by URL")
+    print("[2] Search by Set")
+    print("[3] Search by Product")
     print("[0] Back")
     print_line()
 
@@ -54,6 +63,32 @@ def choose_product_url(df):
 
         else:
             print("\nInvalid option.")
+            
+def set_search(df):
+    while True:
+        print_second_search_menu()
+        option = get_option()
+        
+        if option == "1":
+            search_column = 'URL'
+            search_value = input("\nEnter URL: ").strip()
+            return search_column, search_value
+        
+        elif option == "2":
+            search_column = 'Set'
+            search_value = input("\nEnter Set: ").strip()
+            return search_column, search_value
+        
+        elif option == "3":
+            search_column = 'Product'
+            search_value = input("\nEnter Product: ").strip()
+            return search_column, search_value
+        
+        elif option == "0":
+            return None, None
+        
+        else:
+            print("\nInvalid Option.")
 
 # Prints inventory.
 def print_inventory(df):
@@ -126,6 +161,11 @@ def run(df):
 
         elif option == "5":
             print_inventory(df)
+            
+        elif option == "6":
+            search_column, search_value = set_search(df)
+            if search_column and search_value is not None:
+                utils.search_inventory(df, search_column, search_value)
             
         elif option == "9":
             save_inventory(df, False)
