@@ -1,15 +1,27 @@
 import scrape
 
-# Fixes column types of dataframe, sets URL as index
-def fix_column_types(df):
+# Fixes column types of dataframe, sets URL as index, sorts
+def fix_columns(df):
     columns = ["MSRP", "Market", "TotalMSRP", "TotalMarket", "ReturnAmt", "ReturnPercent"]
     
     for col in columns:
         df[col] = df[col].astype(float)
         
     df["Quantity"] = df["Quantity"].astype(int)
+    df = df.sort_values(by='Market', ascending=False)
     
     return df.set_index("URL", drop=False)
+
+# Returns matching columns
+def search_inventory(df, search_column, search_value):
+    columns = ["Set", "Product", "Quantity", "MSRP", "Market", "TotalMarket", "ReturnAmt", "ReturnPercent"]
+    
+    results = df[df[search_column] == search_value]
+    results = results[columns]
+    if not results.empty:
+        print("\n", results.to_string(index=False))
+    else:
+        print("\nNo Results Found.")
 
 # Updates market prices of all products
 def update_market(df):
