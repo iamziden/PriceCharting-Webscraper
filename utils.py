@@ -139,11 +139,11 @@ def new_row(df, url):
         print("\nInvalid Quantity. Product will not be saved.")
         return None
     
-    msrp = input("Enter MSRP (Retail): ")
+    msrp = input("Enter Cost: ")
     try:
         msrp = float(msrp)
     except ValueError:
-        print("\nInvalid MSRP. Product will not be saved.")
+        print("\nInvalid Cost. Product will not be saved.")
         return None
     
     game_name, set_name, product_type, market, genre = scrape.product_details(url)
@@ -225,19 +225,19 @@ def update_msrp(df, url):
     
     game_name, set_name, product_type, quantity, msrp, market = get_information(df, url)
     
-    print("\nThe current MSRP / Cost of", set_name, product_type, "is", msrp, ".")
-    new_msrp = input("Enter new MSRP / Cost: ").strip()
+    print("\nThe current Cost of", set_name, product_type, "is", msrp, ".")
+    new_msrp = input("Enter Cost: ").strip()
     
     try:
         new_msrp = float(new_msrp)
     except ValueError:
-        print("\nInvalid MSRP / Cost. No changes were made.")
+        print("\nInvalid Cost. No changes were made.")
         return None
     if new_msrp == msrp:
-        print("\nMSRP / Cost is already", msrp, ". No changes were made.")
+        print("\nCost is already", msrp, ". No changes were made.")
         return None
     elif new_msrp <= 0:
-        print("\nMSRP / Cost cannot be less than or equal to 0. No changes were made.")
+        print("\nCost cannot be less than or equal to 0. No changes were made.")
         return None
     
     total_msrp, total_market, return_amount, return_percent = calculate_totals(
@@ -249,7 +249,7 @@ def update_msrp(df, url):
     df.loc[df["URL"] == url, "ReturnAmt"] = return_amount
     df.loc[df["URL"] == url, "ReturnPercent"] = return_percent
     
-    print("\n", "MSRP / Cost of", game_name, ":", set_name, product_type, "has been changed to", new_msrp)
+    print("\n", "Cost of", game_name, ":", set_name, product_type, "has been changed to", new_msrp)
     
 def print_summary(df):
     if df.empty:

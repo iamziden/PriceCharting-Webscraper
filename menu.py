@@ -17,7 +17,7 @@ def print_main_menu():
     print("\n[1] Input Item")
     print("[2] Delete Item")
     print("[3] Update Item Quantity")
-    print("[4] Update Item MSRP / Cost")
+    print("[4] Update Item Cost")
     print("[5] Print Inventory")
     print("[6] Search Inventory")
     print("[9] Save As")
