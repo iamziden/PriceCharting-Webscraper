@@ -5,7 +5,7 @@ import utils
 
 def main():
     df = pd.read_excel("inventory.xlsx")
-    df = utils.fix_column_types(df)
+    df = utils.fix_columns(df)
     utils.update_market(df)
 
     menu.run(df)
