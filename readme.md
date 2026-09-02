@@ -1,6 +1,6 @@
 # PriceCharting Web Scraper & Inventory Tracker
 
-A Python project for tracking inventory and current market prices with PriceCharting.com.
+A Python project for tracking inventory and current market prices of most popular trading card games (TCGs) with PriceCharting.com.
 
 ## Features
 
